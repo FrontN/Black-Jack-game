@@ -1,0 +1,48 @@
+ALGORITMO: Black Jack
+------------------------------
+
+VARIABILI E TIPI:
+  - deck: array
+  - user_card: array
+  - computer_card: array
+  - answer: str  
+
+COSTANTI:
+  -funzione per scegliere a caso una carta: prende un parametro e scegli un elemento nel suo interno
+  -funzione che controlla se 11 fa parte di un elemento e la somma di quel elemento è superiore a 21: prende 2 paramentri, se la somma degli elementi di uno o di 
+  																									tutti e 2 i parametri è superiore a 21 e 11 fa parte dell'elemento
+																									scambia l'11 all'interno dell'elemento con 1
+  -funzione che controlla il Black jack: riceve 2 parametri se le somme degli elementi di tutti e 2 i parametri sono uguale a 21 la funzione restituisce "Draw"
+										se la somma degli elementi di un parametro è uguale a 21 restituisci paramentro "Won"
+  -funzione pick_another_card: prende 2 parametri chiede la scelta dell'utente(se prendere o meno una carta) e gestisce la logica di gioco del computer, se l'utente risponde
+								'no' chiama la funzione game_logic, se 'yes' chiama la funzione over_21 se ritorni prendi una carta
+
+  -funzione game_logic: prende 2 parametri e verifica quale dei 2 parametri ha la somma più alta oppure se sono uguali e restituisce parametro "Won" oppure "Draw"
+  -funzione over_21: prende 2 parametri e controlla uno di loro è superiore a  21, se si restituisce paramentro "lost", se sono inferiori a 21 ritorna a pick_another_card
+
+INIZIO:
+  keep_playing <--- True
+  Finché keep_playing
+  crea un ciclo che si ripete 2 volte
+	user_card <--- funzione per scegliere a caso una carta da deck
+	computer_card <--- funzione per scegliere a caso una carta da deck
+  funzione che controlla se 11 fa parte di user_card o computer_card e la somma di user_card e/o computer_card è superiore a 21
+  funzione che controlla il Black Jack
+  Se Black Jack
+		esci al ciclo
+  fine Se
+
+  Finché
+  funzione pick_another_card
+  Se pick_another_card è uguale a 'yes' e user_card e computer_card < 21
+		continua il ciclo
+  Altrimenti
+		esci dal ciclo
+  fine Se
+  scrivi("Type 'y' to play again, type 'n' to quit)
+  leggi(answer)
+  Se answer != 'y'
+  		keep_playing <--- False
+		scrivi("See You")
+  fine Se
+FINE
