@@ -7,6 +7,9 @@ DEALER_THRESHOLD = 17
 BLACK_JACK = 21
 ACE_LOW_VALUE = 1
 ACE_HIGH_VALUE = 11
+WIN = "You Won"
+LOSE = "The computer Won"
+DRAW = "Draw"
 
 def clear_screen():
     """
@@ -64,41 +67,39 @@ def deal_card(player_or_computer_card, deck):
 
 def Black_Jack(player_card, computer_card):
     """
-    Checks if either the player or the computer has Black Jack.
+    Checks if either the player or the computer has a Black Jack and declares a winner accordingly.
 
-    If the sum of the player's cards is 21, prints "Black Jack" and "You Won".
-    If the sum of the computer's cards is 21, prints "Black Jack" and "The computer Won".
-    If both the sum of the player's cards and the computer's cards are 21, prints "Double Black Jack" and "Draw".
-    If neither of the sums are 21, returns 0.
+    If both the player and the computer have a Black Jack, the function prints "Double Black Jack!" and returns DRAW.
+    If the player has a Black Jack, the function prints "You Won" and returns WIN.
+    If the computer has a Black Jack, the function prints "The computer Won" and returns LOSE.
 
     Parameters:
     player_card (list): The list of cards belonging to the player
     computer_card (list): The list of cards belonging to the computer
 
     Returns:
-    int
+    bool: True if a winner is declared, False otherwise.
     """
+    text = "Black Jack\n"
+    winner = 0
     if sum(player_card) == BLACK_JACK and sum(computer_card) == BLACK_JACK:
-        clear_screen()
-        print("Double Black Jack!\n"
-              "Draw\n"
-              f"your cards: {player_card} : {sum(player_card)}\n"
-              f"computer cards: {computer_card} : {sum(computer_card)}")
-        return True
+        text = "Double Black Jack!\n"
+        winner = DRAW
+
     elif sum(player_card) == BLACK_JACK:
-        clear_screen()
-        print("Black Jack\n"
-              "You Won\n"
-              f"your cards: {player_card} : {sum(player_card)}\n"
-              f"computer cards: {computer_card} : {sum(computer_card)}")
-        return True
+        winner = WIN
+
     elif sum(computer_card) == BLACK_JACK:
+        winner = LOSE
+
+    if winner:
         clear_screen()
-        print("Black Jack\n"
-              "The computer Won\n"
-              f"your cards: {player_card} : {sum(player_card)}\n"
-              f"computer cards: {computer_card} : {sum(computer_card)}")
+        print(f"{text}"
+                f"{winner}\n"
+                f"your cards: {player_card} : {sum(player_card)}\n"
+                f"computer cards: {computer_card} : {sum(computer_card)}")
         return True
+
     return False
 
 def A_or_11(player_card, computer_card):
@@ -174,15 +175,15 @@ def game_logic(player_card, computer_card):
 
     if sum_player_card < BLACK_JACK and sum_computer_card < BLACK_JACK:
         if sum_player_card == sum_computer_card:
-            print("Draw")
+            print(DRAW)
             print(f"{player_card} : {sum_player_card}")
             print(f"{computer_card} : {sum_computer_card}")
         elif sum_player_card > sum_computer_card:
-            print("You Won")
+            print(WIN)
             print(f"{player_card} : {sum_player_card}")
             print(f"{computer_card} : {sum_computer_card}")
         elif sum_computer_card > sum_player_card:
-            print("The computer Won")
+            print(LOSE)
             print(f"{player_card} : {sum_player_card}")
             print(f"{computer_card} : {sum_computer_card}")
     else:
