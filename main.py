@@ -5,9 +5,14 @@ import time
 
 def clear_screen():
     """
-    This function clears the console screen.
+    Clears the console screen and prints the logo.
+
+    This function is used to clear the console screen and print the logo
+    after each round of the game. It is platform independent, and works
+    on both Windows and Unix systems.
     """
     os.system('cls' if os.name == 'nt' else 'clear')
+    print(logo)
 
 def card_shuffle():
     """ 
@@ -16,199 +21,232 @@ def card_shuffle():
     """
     return [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11] * 4
 
-def deal_card(x, y):
-    """ 
-    Deals a card from y to x. If y is empty, it first shuffles a deck of cards. 
-    Then it randomly selects a card from y, removes it from y, and adds it to x.
+def deal_card(player_or_computer_card, deck):
     """
-    if len(y) == 0:
-        y.extend(card_shuffle())
-    card = random.choice(y)
-    y.remove(card)
-    x.append(card)
+    Deals a card from the deck to either the player or the computer.
 
-def Black_Jack(x, y):
-    """ 
-    Compares the sum of the cards in x and y to determine if a player has a Black Jack.
-
-    If both the player and the computer have a Black Jack, the result is a draw.
-    If the player has a Black Jack, the player wins.
-    If the computer has a Black Jack, the computer wins.
+    If the deck is empty, it shuffles a new deck before dealing a card.
 
     Parameters:
-    x (list): The player's cards
-    y (list): The computer's cards
+    player_or_computer_card (list): The list of cards belonging to the player or computer
+    deck (list): The list of cards in the deck
 
     Returns:
     None
     """
-    if sum(x) == 21 and sum(y) == 21:
+    if len(deck) == 0:
+        deck.extend(card_shuffle())
+    card = random.choice(deck)
+    deck.remove(card)
+    player_or_computer_card.append(card)
+
+def Black_Jack(player_card, computer_card):
+    """
+    Checks if either the player or the computer has Black Jack.
+
+    If the sum of the player's cards is 21, prints "Black Jack" and "You Won".
+    If the sum of the computer's cards is 21, prints "Black Jack" and "The computer Won".
+    If both the sum of the player's cards and the computer's cards are 21, prints "Double Black Jack" and "Draw".
+    If neither of the sums are 21, returns 0.
+
+    Parameters:
+    player_card (list): The list of cards belonging to the player
+    computer_card (list): The list of cards belonging to the computer
+
+    Returns:
+    int
+    """
+    if sum(player_card) == 21 and sum(computer_card) == 21:
+        clear_screen()
         print("Double Black Jack!\n"
               "Draw\n"
-              f"computer cards: {y} : {sum(y)}")
+              f"your cards: {player_card} : {sum(player_card)}\n"
+              f"computer cards: {computer_card} : {sum(computer_card)}")
         return 1
-    elif sum(x) == 21:
+    elif sum(player_card) == 21:
+        clear_screen()
         print("Black Jack\n"
               "You Won\n"
-              f"computer cards: {y} : {sum(y)}")
+              f"your cards: {player_card} : {sum(player_card)}\n"
+              f"computer cards: {computer_card} : {sum(computer_card)}")
         return 1
-    elif sum(y) == 21:
+    elif sum(computer_card) == 21:
+        clear_screen()
         print("Black Jack\n"
               "The computer Won\n"
-              f"computer cards: {y} : {sum(y)}")
+              f"your cards: {player_card} : {sum(player_card)}\n"
+              f"computer cards: {computer_card} : {sum(computer_card)}")
         return 1
     return 0
 
-def A_or_11(x, y):
+def A_or_11(player_card, computer_card):
     """
-    If the sum of the cards in x or y is greater than 21 and 11 is in either x or y,
-    it changes the 11 to a 1 to avoid going over 21.
+    Changes any Aces in the player's or computer's hand from 11 to 1 if the sum of the cards in either hand is greater than 21.
 
     Parameters:
-    x (list): The player's cards
-    y (list): The computer's cards
+    player_card (list): The list of cards belonging to the player
+    computer_card (list): The list of cards belonging to the computer
+
+    Returns:
+    None
     """
-    while sum(x) > 21 and 11 in x:
-        x[x.index(11)] = 1
-    while sum(y) > 21 and 11 in y:
-        y[y.index(11)] = 1
+    while sum(player_card) > 21 and 11 in player_card:
+        player_card[player_card.index(11)] = 1
+    while sum(computer_card) > 21 and 11 in computer_card:
+        computer_card[computer_card.index(11)] = 1
 
-def pick_a_card(x,y, z):
+def pick_a_card(player_card, computer_card, deck):
     """
-    Asks the player if they want to pick another card from the deck.
-
-    If the player answers 'y', it deals another card to the player and the computer if the sum of the computer's cards is less than 17 and the sum of the player's cards is less than 22.
-
-    If the player answers 'n', it deals cards to the computer until the sum of the computer's cards is 17 or greater.
-
-    Then it calls A_or_11 to change any Aces from 11 to 1 if the sum of the cards in either the player's hand or the computer's hand is greater than 21.
-
-    Finally, it calls game_logic to determine the winner of the game.
+    Asks the player if they want to pick another card from the deck or pass.
+    If the player chooses to pick a card, it deals a card to the player and computer if the computer's sum is less than 17.
+    If the player's sum is greater than 21, it calls over_21_checker to determine the winner.
+    If the player chooses to pass, it allows the computer to pick a card until the computer's sum is 17 or greater.
+    Then it calls game_logic to determine the winner.
 
     Parameters:
-    x (list): The player's cards
-    y (list): The computer's cards
-    z (list): The deck of cards
+    player_card (list): The list of cards belonging to the player
+    computer_card (list): The list of cards belonging to the computer
+    deck (list): The list of cards in the deck
 
     Returns:
     int
     """
     answer = input("Type 'y' to get another card, type 'n' to pass: ").lower().startswith('y')
     clear_screen()
-    print(logo)
     if answer:
-        deal_card(x, z)
-        if sum(y) < 17 and sum(x) <= 21:
-            deal_card(y, z)
-        A_or_11(x, y)
-        if over_21_checker(x, y) == 1:
+        deal_card(player_card, deck)
+        if sum(computer_card) < 17 and sum(player_card) <= 21:
+            deal_card(computer_card, deck)
+        A_or_11(player_card, computer_card)
+        if over_21_checker(player_card, computer_card) == 1:
             return 1
         return 0
     else:
-        while sum(y) < 17 and sum(x) <= 21:
+        # print("vediamo se entra nel computer loop")
+        # print(computer_card)
+        while sum(computer_card) < 17 and sum(player_card) <= 21:
+            # print("siamo entrati nel computer loop")
+            # print(computer_card)
             print("Computer is picking a card...")
             time.sleep(1)
-            deal_card(y, z)
-            A_or_11(x, y)
-        game_logic(x, y)
+            deal_card(computer_card, deck)
+            A_or_11(player_card, computer_card)
+        # print("siamo usciti dal computer loop")
+        # print(computer_card)
+        game_logic(player_card, computer_card)
+        # print("finisce cui la logica del gioco")
+        # print(computer_card)
         return 1
 
-def game_logic(x, y):
+def game_logic(player_card, computer_card):
     """
-    Determines the winner of the game based on the sum of the cards in x and y.
+    Determines the winner of the game based on the sum of the cards in player_card and computer_card.
 
-    If the sum of the cards in x and y are both less than 21, it compares the two sums.
+    If the sum of the cards in player_card and computer_card are both less than 21, it compares the two sums.
     If the sums are equal, it declares a draw.
-    If the sum of the cards in x is greater than the sum of the cards in y, the player wins.
-    If the sum of the cards in y is greater than the sum of the cards in x, the computer wins.
+    If the sum of the cards in player_card is greater than the sum of the cards in computer_card, the player wins.
+    If the sum of the cards in computer_card is greater than the sum of the cards in player_card, the computer wins.
 
     If either of the sums are greater than 21, it calls over_21_checker to determine the winner.
 
     Parameters:
-    x (list): The player's cards
-    y (list): The computer's cards
+    player_card (list): The player's cards
+    computer_card (list): The computer's cards
 
     Returns:
     None
     """
-    sum_x, sum_y = sum(x), sum(y)
+    sum_player_card, sum_computer_card = sum(player_card), sum(computer_card)
 
-    if sum_x < 21 and sum_y < 21:
-        if sum_x == sum_y:
+    if sum_player_card < 21 and sum_computer_card < 21:
+        if sum_player_card == sum_computer_card:
             print("Draw")
-            print(f"{x} : {sum_x}")
-            print(f"{y} : {sum_y}")
-        elif sum_x > sum_y:
+            print(f"{player_card} : {sum_player_card}")
+            print(f"{computer_card} : {sum_computer_card}")
+        elif sum_player_card > sum_computer_card:
             print("You Won")
-            print(f"{x} : {sum_x}")
-            print(f"{y} : {sum_y}")
-        elif sum_y > sum_x:
+            print(f"{player_card} : {sum_player_card}")
+            print(f"{computer_card} : {sum_computer_card}")
+        elif sum_computer_card > sum_player_card:
             print("The computer Won")
-            print(f"{x} : {sum_x}")
-            print(f"{y} : {sum_y}")
+            print(f"{player_card} : {sum_player_card}")
+            print(f"{computer_card} : {sum_computer_card}")
     else:
-        over_21_checker(x, y)
+        over_21_checker(player_card, computer_card)    
     
-    
-def over_21_checker(x, y):
+def over_21_checker(player_card, computer_card):
     """
-    Checks if the sum of the cards in x or y is greater than 21.
+    Checks if the sum of the cards in player_card or computer_card is greater than 21.
 
-    If the sum of the cards in x is greater than 21, prints "The computer Won" and returns 1.
-    If the sum of the cards in y is greater than 21, prints "You Won" and returns 1.
+    If the sum of the cards in player_card is greater than 21, prints "The computer Won" and returns 1.
+    If the sum of the cards in computer_card is greater than 21, prints "You Won" and returns 1.
     If neither of the sums are greater than 21, returns 0.
 
     Parameters:
-    x (list): The player's cards
-    y (list): The computer's cards
+    player_card (list): The player's cards
+    computer_card (list): The computer's cards
 
     Returns:
     int
     """
-    if sum(x) > 21:
+    if sum(player_card) > 21:
         print("The computer Won")
-        print(f"{x} : {sum(x)}")
-        print(f"{y} : {sum(y)}")
+        print(f"{player_card} : {sum(player_card)}")
+        print(f"{computer_card} : {sum(computer_card)}")
         return 1
-    if sum(y) > 21:
+    if sum(computer_card) > 21:
         print("You Won")
-        print(f"{x} : {sum(x)}")
-        print(f"{y} : {sum(y)}")
+        print(f"{player_card} : {sum(player_card)}")
+        print(f"{computer_card} : {sum(computer_card)}")
         return 1
     return 0
 
-deck = card_shuffle()
+def main():
+    """
+    Main entry point of the program.
 
-keep_playing = True
-while keep_playing:
-    user_card = []
-    computer_card = []
+    Shuffles a deck of cards and enters a loop where it deals two cards to the player and the computer.
+    Then it asks the player if they want to pick another card from the deck if the sum of the player's cards is less than 21 and the sum of the computer's cards is less than 17.
+    If the player's sum of cards is greater than 21, the computer wins.
+    If the computer's sum of cards is greater than 21, the player wins.
+    If neither of the sums are greater than 21, the player with the highest sum of cards wins.
+    After the game is over, it asks the player if they want to play again.
+    If the player answers 'y', it continues to the next loop iteration.
+    If the player answers 'n', it exits the loop and prints "See You!!".
+    """
+    deck = card_shuffle()
 
-    for i in range(2):
-        deal_card(user_card, deck)
-        deal_card(computer_card, deck)
+    keep_playing = True
+    while keep_playing:
+        user_card = []
+        computer_card = []
 
-    A_or_11(user_card, computer_card)
-    
-    clear_screen()
-    print(logo)
-    print(f"Your cards: {user_card} : {sum(user_card)}")
-    print(f"Computer first card: {computer_card[0]}")
+        for i in range(2):
+            deal_card(user_card, deck)
+            deal_card(computer_card, deck)
 
-    if Black_Jack(user_card, computer_card) == 1:
-        pass
-    else:
-        while True:
-            if sum(user_card) > 21:
-                break
-            if pick_a_card(user_card, computer_card, deck) == 1:
-                break
-            clear_screen()
-            print(logo)
-            print(f"Your cards: {user_card} : {sum(user_card)}")
-            print(f"Computer first card: {computer_card[0]}")
+        A_or_11(user_card, computer_card)
+        
+        clear_screen()
+        print(f"Your cards: {user_card} : {sum(user_card)}")
+        print(f"Computer first card: {computer_card[0]}")
 
-    play_again = input("Type 'y' to play again, type 'n' to quit: ").lower().startswith('y')
-    if not play_again:
-        keep_playing = False
-        print("See You!!")
+        if Black_Jack(user_card, computer_card) == 1:
+            pass
+        else:
+            while True:
+                if sum(user_card) > 21:
+                    break
+                if pick_a_card(user_card, computer_card, deck) == 1:
+                    break
+                clear_screen()
+                print(f"Your cards: {user_card} : {sum(user_card)}")
+                print(f"Computer first card: {computer_card[0]}")
+
+        play_again = input("Type 'y' to play again, type 'n' to quit: ").lower().startswith('y')
+        if not play_again:
+            keep_playing = False
+            print("See You!!")
+
+if __name__ == "__main__":
+    main()
