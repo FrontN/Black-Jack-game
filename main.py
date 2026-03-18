@@ -84,22 +84,22 @@ def Black_Jack(player_card, computer_card):
               "Draw\n"
               f"your cards: {player_card} : {sum(player_card)}\n"
               f"computer cards: {computer_card} : {sum(computer_card)}")
-        return 1
+        return True
     elif sum(player_card) == BLACK_JACK:
         clear_screen()
         print("Black Jack\n"
               "You Won\n"
               f"your cards: {player_card} : {sum(player_card)}\n"
               f"computer cards: {computer_card} : {sum(computer_card)}")
-        return 1
+        return True
     elif sum(computer_card) == BLACK_JACK:
         clear_screen()
         print("Black Jack\n"
               "The computer Won\n"
               f"your cards: {player_card} : {sum(player_card)}\n"
               f"computer cards: {computer_card} : {sum(computer_card)}")
-        return 1
-    return 0
+        return True
+    return False
 
 def A_or_11(player_card, computer_card):
     """
@@ -141,8 +141,8 @@ def pick_a_card(player_card, computer_card, deck):
             deal_card(computer_card, deck)
         A_or_11(player_card, computer_card)
         if over_21_checker(player_card, computer_card) == 1:
-            return 1
-        return 0
+            return True
+        return False
     elif answer.startswith('n'):
         while sum(computer_card) < DEALER_THRESHOLD and sum(player_card) <= BLACK_JACK:
             print("Computer is picking a card...")
@@ -150,7 +150,7 @@ def pick_a_card(player_card, computer_card, deck):
             deal_card(computer_card, deck)
             A_or_11(player_card, computer_card)
         game_logic(player_card, computer_card)
-        return 1
+        return True
 
 def game_logic(player_card, computer_card):
     """
@@ -207,13 +207,13 @@ def over_21_checker(player_card, computer_card):
         print("The computer Won")
         print(f"{player_card} : {sum(player_card)}")
         print(f"{computer_card} : {sum(computer_card)}")
-        return 1
+        return True
     if sum(computer_card) > BLACK_JACK:
         print("You Won")
         print(f"{player_card} : {sum(player_card)}")
         print(f"{computer_card} : {sum(computer_card)}")
-        return 1
-    return 0
+        return True
+    return False
 
 def main():
     """
@@ -245,13 +245,11 @@ def main():
         print(f"Your cards: {user_card} : {sum(user_card)}")
         print(f"Computer first card: {computer_card[0]}")
 
-        if Black_Jack(user_card, computer_card) == 1:
-            pass
-        else:
+        if not Black_Jack(user_card, computer_card):
             while True:
                 if sum(user_card) > BLACK_JACK:
                     break
-                if pick_a_card(user_card, computer_card, deck) == 1:
+                if pick_a_card(user_card, computer_card, deck):
                     break
                 clear_screen()
                 print(f"Your cards: {user_card} : {sum(user_card)}")
