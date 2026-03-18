@@ -3,6 +3,8 @@ import random
 import os
 import time
 
+DEALER_THRESHOLD = 17
+
 def clear_screen():
     """
     Clears the console screen and prints the logo.
@@ -36,8 +38,7 @@ def deal_card(player_or_computer_card, deck):
     """
     if len(deck) == 0:
         deck.extend(card_shuffle())
-    card = random.choice(deck)
-    deck.remove(card)
+    card = deck.pop(random.randint(0, len(deck) - 1))
     player_or_computer_card.append(card)
 
 def Black_Jack(player_card, computer_card):
@@ -115,27 +116,19 @@ def pick_a_card(player_card, computer_card, deck):
     clear_screen()
     if answer:
         deal_card(player_card, deck)
-        if sum(computer_card) < 17 and sum(player_card) <= 21:
+        if sum(computer_card) < DEALER_THRESHOLD and sum(player_card) <= 21:
             deal_card(computer_card, deck)
         A_or_11(player_card, computer_card)
         if over_21_checker(player_card, computer_card) == 1:
             return 1
         return 0
     else:
-        # print("vediamo se entra nel computer loop")
-        # print(computer_card)
-        while sum(computer_card) < 17 and sum(player_card) <= 21:
-            # print("siamo entrati nel computer loop")
-            # print(computer_card)
+        while sum(computer_card) < DEALER_THRESHOLD and sum(player_card) <= 21:
             print("Computer is picking a card...")
             time.sleep(1)
             deal_card(computer_card, deck)
             A_or_11(player_card, computer_card)
-        # print("siamo usciti dal computer loop")
-        # print(computer_card)
         game_logic(player_card, computer_card)
-        # print("finisce cui la logica del gioco")
-        # print(computer_card)
         return 1
 
 def game_logic(player_card, computer_card):
@@ -221,7 +214,7 @@ def main():
         user_card = []
         computer_card = []
 
-        for i in range(2):
+        for _ in range(2):
             deal_card(user_card, deck)
             deal_card(computer_card, deck)
 
