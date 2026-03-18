@@ -4,6 +4,9 @@ import os
 import time
 
 DEALER_THRESHOLD = 17
+BLACK_JACK = 21
+ACE_LOW_VALUE = 1
+ACE_HIGH_VALUE = 11
 
 def clear_screen():
     """
@@ -15,6 +18,24 @@ def clear_screen():
     """
     os.system('cls' if os.name == 'nt' else 'clear')
     print(logo)
+
+def get_valid_input(prompt, valid_options):
+    """
+    Prompts the user for input and validates it against a list of valid options.
+
+    Parameters:
+    prompt (str): The message to display to the user when asking for input.
+    valid_options (list): A list of valid options that the user's input must match.
+
+    Returns:
+    str: The valid input entered by the user.
+    """
+    while True:
+        user_input = input(prompt).lower()
+        if user_input in valid_options:
+            return user_input
+        else:
+            print(f"Invalid input. Please enter one of the following: {', '.join(valid_options)}")
 
 def card_shuffle():
     """ 
@@ -57,21 +78,21 @@ def Black_Jack(player_card, computer_card):
     Returns:
     int
     """
-    if sum(player_card) == 21 and sum(computer_card) == 21:
+    if sum(player_card) == BLACK_JACK and sum(computer_card) == BLACK_JACK:
         clear_screen()
         print("Double Black Jack!\n"
               "Draw\n"
               f"your cards: {player_card} : {sum(player_card)}\n"
               f"computer cards: {computer_card} : {sum(computer_card)}")
         return 1
-    elif sum(player_card) == 21:
+    elif sum(player_card) == BLACK_JACK:
         clear_screen()
         print("Black Jack\n"
               "You Won\n"
               f"your cards: {player_card} : {sum(player_card)}\n"
               f"computer cards: {computer_card} : {sum(computer_card)}")
         return 1
-    elif sum(computer_card) == 21:
+    elif sum(computer_card) == BLACK_JACK:
         clear_screen()
         print("Black Jack\n"
               "The computer Won\n"
@@ -91,10 +112,10 @@ def A_or_11(player_card, computer_card):
     Returns:
     None
     """
-    while sum(player_card) > 21 and 11 in player_card:
-        player_card[player_card.index(11)] = 1
-    while sum(computer_card) > 21 and 11 in computer_card:
-        computer_card[computer_card.index(11)] = 1
+    while sum(player_card) > BLACK_JACK and ACE_HIGH_VALUE in player_card:
+        player_card[player_card.index(ACE_HIGH_VALUE)] = ACE_LOW_VALUE
+    while sum(computer_card) > BLACK_JACK and ACE_HIGH_VALUE in computer_card:
+        computer_card[computer_card.index(ACE_HIGH_VALUE)] = ACE_LOW_VALUE
 
 def pick_a_card(player_card, computer_card, deck):
     """
@@ -112,18 +133,18 @@ def pick_a_card(player_card, computer_card, deck):
     Returns:
     int
     """
-    answer = input("Type 'y' to get another card, type 'n' to pass: ").lower().startswith('y')
+    answer = get_valid_input("Type 'y' to get another card, type 'n' to pass: ", ['y', 'yes', 'n', 'no'])
     clear_screen()
-    if answer:
+    if answer.startswith('y'):
         deal_card(player_card, deck)
-        if sum(computer_card) < DEALER_THRESHOLD and sum(player_card) <= 21:
+        if sum(computer_card) < DEALER_THRESHOLD and sum(player_card) <= BLACK_JACK:
             deal_card(computer_card, deck)
         A_or_11(player_card, computer_card)
         if over_21_checker(player_card, computer_card) == 1:
             return 1
         return 0
-    else:
-        while sum(computer_card) < DEALER_THRESHOLD and sum(player_card) <= 21:
+    elif answer.startswith('n'):
+        while sum(computer_card) < DEALER_THRESHOLD and sum(player_card) <= BLACK_JACK:
             print("Computer is picking a card...")
             time.sleep(1)
             deal_card(computer_card, deck)
@@ -151,7 +172,7 @@ def game_logic(player_card, computer_card):
     """
     sum_player_card, sum_computer_card = sum(player_card), sum(computer_card)
 
-    if sum_player_card < 21 and sum_computer_card < 21:
+    if sum_player_card < BLACK_JACK and sum_computer_card < BLACK_JACK:
         if sum_player_card == sum_computer_card:
             print("Draw")
             print(f"{player_card} : {sum_player_card}")
@@ -182,12 +203,12 @@ def over_21_checker(player_card, computer_card):
     Returns:
     int
     """
-    if sum(player_card) > 21:
+    if sum(player_card) > BLACK_JACK:
         print("The computer Won")
         print(f"{player_card} : {sum(player_card)}")
         print(f"{computer_card} : {sum(computer_card)}")
         return 1
-    if sum(computer_card) > 21:
+    if sum(computer_card) > BLACK_JACK:
         print("You Won")
         print(f"{player_card} : {sum(player_card)}")
         print(f"{computer_card} : {sum(computer_card)}")
@@ -228,18 +249,20 @@ def main():
             pass
         else:
             while True:
-                if sum(user_card) > 21:
+                if sum(user_card) > BLACK_JACK:
                     break
                 if pick_a_card(user_card, computer_card, deck) == 1:
                     break
                 clear_screen()
                 print(f"Your cards: {user_card} : {sum(user_card)}")
                 print(f"Computer first card: {computer_card[0]}")
-
-        play_again = input("Type 'y' to play again, type 'n' to quit: ").lower().startswith('y')
-        if not play_again:
+                
+        play_again = get_valid_input("Type 'y' to play again, type 'n' to quit: ", ['y', 'yes', 'n', 'no'])
+        if play_again.startswith('n'):
             keep_playing = False
             print("See You!!")
+            break
+
 
 if __name__ == "__main__":
     main()
