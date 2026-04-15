@@ -39,11 +39,17 @@ def get_valid_input(prompt, valid_options):
             return user_input
         else:
             print(f"Invalid input. Please enter one of the following: {', '.join(valid_options)}")
+            time.sleep(1.5)
+            clear_screen()
 
-def card_shuffle():
-    """ 
-    Returns a shuffled deck of 52 cards. Each card is represented as an integer, 
-    with 2-10 being face value, and 11 being an Ace. Jacks, Queens, and Kings are represented as 10.
+def card_deck():
+    """
+    Returns a list of 52 cards, with four of each number from 2 to 11.
+
+    The list is used to represent a deck of cards in the game of Black Jack.
+
+    Returns:
+    list: A list of 52 cards, with four of each number from 2 to 11.
     """
     return [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11] * 4
 
@@ -61,11 +67,11 @@ def deal_card(player_or_computer_card, deck):
     None
     """
     if len(deck) == 0:
-        deck.extend(card_shuffle())
+        deck.extend(card_deck())
     card = deck.pop(random.randint(0, len(deck) - 1))
     player_or_computer_card.append(card)
 
-def Black_Jack(player_card, computer_card):
+def Black_Jack(player_cards, computer_cards):
     """
     Checks if either the player or the computer has a Black Jack and declares a winner accordingly.
 
@@ -74,147 +80,149 @@ def Black_Jack(player_card, computer_card):
     If the computer has a Black Jack, the function prints "The computer Won" and returns LOSE.
 
     Parameters:
-    player_card (list): The list of cards belonging to the player
-    computer_card (list): The list of cards belonging to the computer
+    player_cards (list): The list of cards belonging to the player
+    computer_cards (list): The list of cards belonging to the computer
 
     Returns:
     bool: True if a winner is declared, False otherwise.
     """
     text = "Black Jack\n"
-    winner = 0
-    if sum(player_card) == BLACK_JACK and sum(computer_card) == BLACK_JACK:
+    winner = ""
+    if sum(player_cards) == BLACK_JACK and sum(computer_cards) == BLACK_JACK:
         text = "Double Black Jack!\n"
         winner = DRAW
 
-    elif sum(player_card) == BLACK_JACK:
+    elif sum(player_cards) == BLACK_JACK:
         winner = WIN
 
-    elif sum(computer_card) == BLACK_JACK:
+    elif sum(computer_cards) == BLACK_JACK:
         winner = LOSE
 
     if winner:
         clear_screen()
         print(f"{text}"
                 f"{winner}\n"
-                f"your cards: {player_card} : {sum(player_card)}\n"
-                f"computer cards: {computer_card} : {sum(computer_card)}")
+                f"your cards: {player_cards} : {sum(player_cards)}\n"
+                f"computer cards: {computer_cards} : {sum(computer_cards)}")
         return True
 
     return False
 
-def A_or_11(player_card, computer_card):
+def A_or_11(player_cards, computer_cards):
     """
-    Changes any Aces in the player's or computer's hand from 11 to 1 if the sum of the cards in either hand is greater than 21.
+    Checks if the sum of the cards in player_cards or computer_cards is greater than 21.
+    If it is, it replaces any ACE_HIGH_VALUE cards with ACE_LOW_VALUE cards to reduce the sum below 21.
 
     Parameters:
-    player_card (list): The list of cards belonging to the player
-    computer_card (list): The list of cards belonging to the computer
+    player_cards (list): The list of cards belonging to the player
+    computer_cards (list): The list of cards belonging to the computer
 
     Returns:
     None
     """
-    while sum(player_card) > BLACK_JACK and ACE_HIGH_VALUE in player_card:
-        player_card[player_card.index(ACE_HIGH_VALUE)] = ACE_LOW_VALUE
-    while sum(computer_card) > BLACK_JACK and ACE_HIGH_VALUE in computer_card:
-        computer_card[computer_card.index(ACE_HIGH_VALUE)] = ACE_LOW_VALUE
+    config = [
+        (player_cards, ACE_HIGH_VALUE, ACE_LOW_VALUE),
+        (computer_cards, ACE_HIGH_VALUE, ACE_LOW_VALUE)
+    ]
+    for cards, high_value, low_value in config:
+        while sum(cards) > BLACK_JACK and high_value in cards:
+            cards[cards.index(high_value)] = low_value
 
-def pick_a_card(player_card, computer_card, deck):
+def pick_a_card(player_cards, computer_cards, deck):
     """
-    Asks the player if they want to pick another card from the deck or pass.
-    If the player chooses to pick a card, it deals a card to the player and computer if the computer's sum is less than 17.
-    If the player's sum is greater than 21, it calls over_21_checker to determine the winner.
-    If the player chooses to pass, it allows the computer to pick a card until the computer's sum is 17 or greater.
-    Then it calls game_logic to determine the winner.
+    Asks the user if they want to pick another card from the deck.
+
+    If the user answers 'y', it deals a card to the player and checks if the player's sum of cards is over 21.
+    If the user answers 'n', it deals cards to the computer until the computer's sum of cards is over 16 or the player's sum of cards is over 21.
+    Then it checks if either the player or the computer has a Black Jack and declares a winner accordingly.
 
     Parameters:
-    player_card (list): The list of cards belonging to the player
-    computer_card (list): The list of cards belonging to the computer
+    player_cards (list): The list of cards belonging to the player
+    computer_cards (list): The list of cards belonging to the computer
     deck (list): The list of cards in the deck
 
     Returns:
-    int
+    bool: True if the player or computer has a Black Jack, False otherwise.
     """
     answer = get_valid_input("Type 'y' to get another card, type 'n' to pass: ", ['y', 'yes', 'n', 'no'])
     clear_screen()
     if answer.startswith('y'):
-        deal_card(player_card, deck)
-        if sum(computer_card) < DEALER_THRESHOLD and sum(player_card) <= BLACK_JACK:
-            deal_card(computer_card, deck)
-        A_or_11(player_card, computer_card)
-        if over_21_checker(player_card, computer_card) == 1:
-            return True
-        return False
-    elif answer.startswith('n'):
-        while sum(computer_card) < DEALER_THRESHOLD and sum(player_card) <= BLACK_JACK:
+        deal_card(player_cards, deck)
+        A_or_11(player_cards, computer_cards)
+    if answer.startswith('n'):
+        while sum(computer_cards) < DEALER_THRESHOLD and sum(player_cards) <= BLACK_JACK:
             print("Computer is picking a card...")
             time.sleep(1)
-            deal_card(computer_card, deck)
-            A_or_11(player_card, computer_card)
-        game_logic(player_card, computer_card)
-        return True
+            deal_card(computer_cards, deck)
+            A_or_11(player_cards, computer_cards)
+        game_logic(player_cards, computer_cards)
+    return over_21_checker(player_cards, computer_cards) if answer.startswith('y') else True
 
-def game_logic(player_card, computer_card):
+def game_logic(player_cards, computer_cards):
     """
-    Determines the winner of the game based on the sum of the cards in player_card and computer_card.
+    Compares the sum of the player's and computer's cards to determine the winner.
 
-    If the sum of the cards in player_card and computer_card are both less than 21, it compares the two sums.
-    If the sums are equal, it declares a draw.
-    If the sum of the cards in player_card is greater than the sum of the cards in computer_card, the player wins.
-    If the sum of the cards in computer_card is greater than the sum of the cards in player_card, the computer wins.
-
-    If either of the sums are greater than 21, it calls over_21_checker to determine the winner.
+    If both sums are less than or equal to 21, it compares the sums directly.
+    If the player's sum is equal to the computer's sum, it prints "Draw".
+    If the player's sum is greater than the computer's sum, it prints "You Won".
+    If the computer's sum is greater than the player's sum, it prints "The computer Won".
+    If either of the sums is greater than 21, it calls over_21_checker to determine the winner.
 
     Parameters:
-    player_card (list): The player's cards
-    computer_card (list): The computer's cards
+    player_cards (list): The player's cards
+    computer_cards (list): The computer's cards
 
     Returns:
     None
     """
-    sum_player_card, sum_computer_card = sum(player_card), sum(computer_card)
+    sum_player_card, sum_computer_card = sum(player_cards), sum(computer_cards)
 
-    if sum_player_card < BLACK_JACK and sum_computer_card < BLACK_JACK:
+    if sum_player_card <= BLACK_JACK and sum_computer_card <= BLACK_JACK:
         if sum_player_card == sum_computer_card:
             print(DRAW)
-            print(f"{player_card} : {sum_player_card}")
-            print(f"{computer_card} : {sum_computer_card}")
         elif sum_player_card > sum_computer_card:
             print(WIN)
-            print(f"{player_card} : {sum_player_card}")
-            print(f"{computer_card} : {sum_computer_card}")
         elif sum_computer_card > sum_player_card:
             print(LOSE)
-            print(f"{player_card} : {sum_player_card}")
-            print(f"{computer_card} : {sum_computer_card}")
+        print(f"{player_cards} : {sum_player_card}")
+        print(f"{computer_cards} : {sum_computer_card}")
     else:
-        over_21_checker(player_card, computer_card)    
+        over_21_checker(player_cards, computer_cards)    
     
 def over_21_checker(player_card, computer_card):
     """
-    Checks if the sum of the cards in player_card or computer_card is greater than 21.
+    Checks if either the player's or computer's cards are over 21.
 
-    If the sum of the cards in player_card is greater than 21, prints "The computer Won" and returns 1.
-    If the sum of the cards in computer_card is greater than 21, prints "You Won" and returns 1.
-    If neither of the sums are greater than 21, returns 0.
+    If the player's cards are over 21, it prints "You Lost".
+    If the computer's cards are over 21, it prints "You Won".
+    If neither of the cards are over 21, it prints out the sums of the player's and computer's cards.
+    Returns True if either of the cards are over 21, False otherwise.
 
     Parameters:
     player_card (list): The player's cards
     computer_card (list): The computer's cards
 
     Returns:
-    int
+    bool: True if either of the cards are over 21, False otherwise.
     """
     if sum(player_card) > BLACK_JACK:
-        print("The computer Won")
-        print(f"{player_card} : {sum(player_card)}")
-        print(f"{computer_card} : {sum(computer_card)}")
-        return True
-    if sum(computer_card) > BLACK_JACK:
-        print("You Won")
-        print(f"{player_card} : {sum(player_card)}")
-        print(f"{computer_card} : {sum(computer_card)}")
-        return True
-    return False
+        print(LOSE)
+    elif sum(computer_card) > BLACK_JACK:
+        print(WIN)
+    print(f"{player_card} : {sum(player_card)}")
+    print(f"{computer_card} : {sum(computer_card)}")
+    return True if sum(player_card) > BLACK_JACK or sum(computer_card) > BLACK_JACK else False
+
+def card_info(player_cards, computer_cards):
+    """
+    Prints out the player's cards and the computer's first card.
+
+    Parameters:
+    player_cards (list): The player's cards
+    computer_cards (list): The computer's cards
+    """
+    print(f"Your cards: {player_cards} : {sum(player_cards)}")
+    print(f"Computer first card: {computer_cards[0]}")
 
 def main():
     """
@@ -229,39 +237,32 @@ def main():
     If the player answers 'y', it continues to the next loop iteration.
     If the player answers 'n', it exits the loop and prints "See You!!".
     """
-    deck = card_shuffle()
+    deck = card_deck()
 
     keep_playing = True
     while keep_playing:
-        user_card = []
-        computer_card = []
+        player_cards = []
+        computer_cards = []
 
         for _ in range(2):
-            deal_card(user_card, deck)
-            deal_card(computer_card, deck)
+            deal_card(player_cards, deck)
+            deal_card(computer_cards, deck)
 
-        A_or_11(user_card, computer_card)
+        A_or_11(player_cards, computer_cards)
         
         clear_screen()
-        print(f"Your cards: {user_card} : {sum(user_card)}")
-        print(f"Computer first card: {computer_card[0]}")
+        card_info(player_cards, computer_cards)
 
-        if not Black_Jack(user_card, computer_card):
-            while True:
-                if sum(user_card) > BLACK_JACK:
-                    break
-                if pick_a_card(user_card, computer_card, deck):
-                    break
+        if not Black_Jack(player_cards, computer_cards):
+            while not pick_a_card(player_cards, computer_cards, deck):
                 clear_screen()
-                print(f"Your cards: {user_card} : {sum(user_card)}")
-                print(f"Computer first card: {computer_card[0]}")
+                card_info(player_cards, computer_cards)
                 
         play_again = get_valid_input("Type 'y' to play again, type 'n' to quit: ", ['y', 'yes', 'n', 'no'])
         if play_again.startswith('n'):
             keep_playing = False
             print("See You!!")
             break
-
 
 if __name__ == "__main__":
     main()
