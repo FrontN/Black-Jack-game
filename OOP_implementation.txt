@@ -1,0 +1,25 @@
+------------------------------------------# What is it? #-----------------------------------------------------
+
+a Black Jack game
+
+-----------------------------------# What can it do? (Methods) #-------------------------------------------
+
+puts a deck of cards at disposal
+manages the deck (shuffles/monitors)
+adds cards if the deck is empty
+distributes cards
+checks for Black Jack
+manages the value of the Ace (1/11)
+allows players to choose whether to take another card or not
+calculates the sum of the cards
+prints the result of the sums
+checks if the sum of the cards of one or both players has exceeded 21
+checks if the players have drawn or if one of them has won
+manages the bets
+
+------------------------# What does it have/contain? (Attributes/Classes) #-----------------------------
+
+a deck of cards-
+a dealer that also serves as a dealer
+a player (calculates and decides)
+the rules of the game
